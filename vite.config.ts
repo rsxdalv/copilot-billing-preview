@@ -22,6 +22,21 @@ function resolveBuildVersion() {
   }
 }
 
+// GitHub Pages project sites are served from a repository sub-path
+// (https://<owner>.github.io/<repo>/), so assets and public files must be
+// referenced with that prefix. Locally the site is served from the root.
+function resolveBase() {
+  const repository = process.env.GITHUB_REPOSITORY
+  if (repository) {
+    const repositoryName = repository.split('/')[1]
+    if (repositoryName) {
+      return `/${repositoryName}/`
+    }
+  }
+
+  return '/'
+}
+
 function versionManifestPlugin(): Plugin {
   return {
     name: 'app-version-manifest',
@@ -37,6 +52,7 @@ function versionManifestPlugin(): Plugin {
 
 // https://vite.dev/config/
 export default defineConfig({
+  base: resolveBase(),
   define: {
     __APP_VERSION__: JSON.stringify(buildVersion),
   },
